@@ -1,0 +1,24 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/E-CommerceTechnology?createDatabaseIfNotExist=true
+    username: root
+    password: Hoangkhanhvan703
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQL8Dialect
+
+jwt:
+  secret: "MAOAaDeZDPe7abJfyyYmg6G4TQXTdQHNrGRFTdOr1whp6zdheS/COfx2GlDSMbXH"
+  expiration: 86400000
+  valid-duration: 3600 # in second
+  refresh-duration : 36000
