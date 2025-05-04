@@ -36,7 +36,8 @@ public class CategoryService implements ICategoryService {
 
     @Override
     public CategoryResponse updateCategory(String name, CategoryRequest categoryRequest) {
-        CategoryEntity category = categoryRepository.findById(name).orElseThrow( () -> new RuntimeException("Category not found."));
+        CategoryEntity category = categoryRepository.findById(name)
+                .orElseThrow( () -> new RuntimeException("Category not found."));
         categoryMapper.updateCategory(category, categoryRequest);
         return categoryMapper.toCategoryResponse(categoryRepository.save(category));
     }
