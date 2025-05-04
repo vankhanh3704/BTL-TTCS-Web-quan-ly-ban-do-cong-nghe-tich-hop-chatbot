@@ -9,7 +9,7 @@ import org.springframework.data.domain.Pageable;
 public interface ICategoryService {
     Page<CategoryResponse> findAllCategory(Pageable pageable);
     CategoryResponse createCategory(CategoryRequest categoryRequest);
-    CategoryResponse updateCategory(Long id, CategoryRequest categoryRequest);
-    void deleteCategory(Long id);
+    CategoryResponse updateCategory(String name, CategoryRequest categoryRequest);
+    void deleteCategory(String id);
 
 }

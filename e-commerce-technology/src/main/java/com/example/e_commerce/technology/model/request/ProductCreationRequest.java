@@ -16,4 +16,5 @@ public class ProductCreationRequest {
     Long price;
     String description;
     Long stock;
+    String categoryId;
 }

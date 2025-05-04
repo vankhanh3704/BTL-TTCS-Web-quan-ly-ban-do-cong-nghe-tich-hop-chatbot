@@ -16,8 +16,7 @@ import lombok.experimental.FieldDefaults;
 @Table(name = "Category")
 public class CategoryEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+    @Column(name = "name", nullable = false)
     String name;
     String description;
 }

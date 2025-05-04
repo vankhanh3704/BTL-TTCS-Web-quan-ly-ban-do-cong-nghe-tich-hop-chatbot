@@ -29,13 +29,13 @@ public class CategoryController {
     }
 
     @PutMapping("/{id}")
-    ApiResponse<CategoryResponse> updateCategory(@PathVariable Long id, @RequestBody CategoryRequest request){
+    ApiResponse<CategoryResponse> updateCategory(@PathVariable String id, @RequestBody CategoryRequest request){
         return ApiResponse.<CategoryResponse>builder()
                 .result(categoryService.updateCategory(id, request)).build();
     }
 
     @DeleteMapping("/{id}")
-    ApiResponse<Void> deleteCategory(@PathVariable Long id){
+    ApiResponse<Void> deleteCategory(@PathVariable String id){
         categoryService.deleteCategory(id);
         return ApiResponse.<Void>builder()
                 .build();

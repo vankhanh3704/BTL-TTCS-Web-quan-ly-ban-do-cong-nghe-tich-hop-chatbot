@@ -1,11 +1,15 @@
 package com.example.e_commerce.technology.service.impl;
 
+import com.example.e_commerce.technology.Entity.CategoryEntity;
 import com.example.e_commerce.technology.Entity.ProductEntity;
 import com.example.e_commerce.technology.Entity.UserEntity;
+import com.example.e_commerce.technology.Enum.ErrorCode;
+import com.example.e_commerce.technology.exception.AppException;
 import com.example.e_commerce.technology.mapper.ProductMapper;
 import com.example.e_commerce.technology.model.request.ProductCreationRequest;
 import com.example.e_commerce.technology.model.response.ApiResponse;
 import com.example.e_commerce.technology.model.response.ProductResponse;
+import com.example.e_commerce.technology.repository.CategoryRepository;
 import com.example.e_commerce.technology.repository.ProductRepository;
 import com.example.e_commerce.technology.service.IProductService;
 import lombok.AccessLevel;
@@ -21,11 +25,22 @@ import org.springframework.stereotype.Service;
 public class ProductService implements IProductService {
     ProductRepository productRepository;
     ProductMapper productMapper;
+    CategoryRepository categoryRepository;
 
     @Override
     public ProductResponse createProduct(ProductCreationRequest request) {
-        ProductEntity product = productMapper.toProduct(request);
-        return productMapper.toProductResponse(productRepository.save(product));
+        CategoryEntity category = categoryRepository.findById(request.getCategoryId())
+                .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
+
+        // Ánh xạ request sang entity
+        ProductEntity productEntity = productMapper.toProduct(request);
+        productEntity.setCategory(category); // Đặt danh mục đã kiểm tra
+
+        // Lưu sản phẩm
+        ProductEntity savedProduct = productRepository.save(productEntity);
+
+        // Ánh xạ entity sang response
+        return productMapper.toProductResponse(savedProduct);
     }
 
 }

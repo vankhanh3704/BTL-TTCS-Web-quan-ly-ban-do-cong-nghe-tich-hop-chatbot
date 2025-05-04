@@ -35,14 +35,16 @@ public class CategoryService implements ICategoryService {
     }
 
     @Override
-    public CategoryResponse updateCategory(Long id, CategoryRequest categoryRequest) {
-        CategoryEntity category = categoryRepository.findById(id).orElseThrow( () -> new RuntimeException("Category not found."));
+    public CategoryResponse updateCategory(String name, CategoryRequest categoryRequest) {
+        CategoryEntity category = categoryRepository.findById(name).orElseThrow( () -> new RuntimeException("Category not found."));
         categoryMapper.updateCategory(category, categoryRequest);
         return categoryMapper.toCategoryResponse(categoryRepository.save(category));
     }
 
     @Override
-    public void deleteCategory(Long id) {
+    public void deleteCategory(String id) {
         categoryRepository.deleteById(id);
     }
+
+
 }
