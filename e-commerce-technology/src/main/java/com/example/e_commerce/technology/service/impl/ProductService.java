@@ -30,6 +30,7 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -131,25 +132,30 @@ public class ProductService implements IProductService {
             try {
                 // Tối ưu hóa ảnh
                 BufferedImage originalImage = ImageIO.read(file.getInputStream());
-                BufferedImage resizedImage = Scalr.resize(originalImage, Scalr.Method.QUALITY, Scalr.Mode.FIT_TO_WIDTH, 800); // Resize về 800px chiều rộng
 
-                // Tạo tên file duy nhất
+                // Resize ảnh chính (800px)
+                BufferedImage mainImage = Scalr.resize(originalImage, Scalr.Method.QUALITY, Scalr.Mode.FIT_TO_WIDTH, 800);
                 String fileName = UUID.randomUUID() + "-" + file.getOriginalFilename();
-                Path filePath = Paths.get(uploadDir, fileName);
+                Path mainPath = Paths.get(uploadDir, fileName);
+                ImageIO.write(mainImage, "jpg", mainPath.toFile());
+                String mainUrl = "/uploads/" + fileName;
 
-                // Lưu ảnh đã tối ưu
-                ImageIO.write(resizedImage, "jpg", filePath.toFile());
 
-                // Tạo URL (giả sử server chạy trên localhost:8080)
-                String url = "/uploads/" + fileName;
-                imageUrls.add(url);
+                // Tạo thumbnail (200px)
+                BufferedImage thumbnail = Scalr.resize(originalImage, Scalr.Method.QUALITY, Scalr.Mode.FIT_TO_WIDTH, 200);
+                String thumbnailName = UUID.randomUUID() + "-thumb-" + file.getOriginalFilename();
+                Path thumbPath = Paths.get(uploadDir, thumbnailName);
+                ImageIO.write(thumbnail, "jpg", thumbPath.toFile());
+                String thumbUrl = "/uploads/" + thumbnailName;
 
-                // Lưu vào database
+                // lưu vào database
                 ProductImageEntity image = ProductImageEntity.builder()
-                        .image_url(url)
+                        .image_url(mainUrl)
                         .altText(file.getOriginalFilename())
                         .product(product)
                         .build();
+                product.getImages().add(image);
+                imageUrls.add(mainUrl);
                 product.getImages().add(image);
             } catch (IOException e) {
                 log.error("Failed to upload image: {}", file.getOriginalFilename(), e);
@@ -159,5 +165,27 @@ public class ProductService implements IProductService {
 
         productRepository.save(product);
         return imageUrls;
+    }
+
+    @Override
+    public void deleteProductImage(Long productId, Long imageId) {
+        ProductEntity product = productRepository.findById(productId)
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_EXISTED));
+
+        ProductImageEntity image = product.getImages().stream()
+                .filter(img -> img.getId().equals(imageId))
+                .findFirst()
+                .orElseThrow(() -> new AppException(ErrorCode.IMAGE_NOT_FOUND));
+
+        // Xóa file trên server (nếu lưu local)
+        try {
+            Files.deleteIfExists(Paths.get(image.getImage_url().replace("/uploads/", uploadDir + "/")));
+        } catch (IOException e) {
+            log.error("Failed to delete image file: {}", image.getImage_url(), e);
+        }
+
+        // Xóa ảnh khỏi danh sách
+        product.getImages().remove(image);
+        productRepository.save(product);
     }
 }

@@ -75,4 +75,13 @@ public class ProductController {
                 .result(productService.uploadProductImages(id, files))
                 .build();
     }
+
+    @DeleteMapping("/{productId}/images/{imageId}")
+    public ApiResponse<String> deleteProductImage(@PathVariable Long productId, @PathVariable Long imageId) {
+        log.info("Deleting image ID: {} for product ID: {}", imageId, productId);
+        productService.deleteProductImage(productId, imageId);
+        return ApiResponse.<String>builder()
+                .result("Image deleted successfully")
+                .build();
+    }
 }
