@@ -2,10 +2,7 @@ package com.example.e_commerce.technology.Entity;
 
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 @Entity
@@ -14,15 +11,19 @@ import lombok.experimental.FieldDefaults;
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Table(name = "ProductImage")
-public class ProductImage {
+@Builder
+public class ProductImageEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
-
+    @Column(nullable = false)
     String image_url;
+
+    @Column
+    String altText;
 
     @ManyToOne
     @JoinColumn(name = "productId", nullable = false)
-    ProductEntity productEntity;
+    ProductEntity product;
 
 }

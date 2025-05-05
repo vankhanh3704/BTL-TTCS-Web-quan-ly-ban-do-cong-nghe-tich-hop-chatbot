@@ -6,6 +6,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @AllArgsConstructor
@@ -32,6 +33,9 @@ public class ProductEntity {
     @ManyToOne
     @JoinColumn(name = "categoryId", nullable = false)
     CategoryEntity category;
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    List<ProductImageEntity> images;
 
 
     @PrePersist

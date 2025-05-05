@@ -16,6 +16,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -62,5 +63,16 @@ public class ProductController {
         log.info("Received search request: {}", request);
         Page<ProductResponse> result = productService.searchProducts(request, pageable);
         return ApiResponse.<Page<ProductResponse>>builder().result(result).build();
+    }
+
+    @PostMapping("/{id}/images")
+    public ApiResponse<List<String>> uploadProductImages(
+            @PathVariable Long id,
+            @RequestParam("files") List<MultipartFile> files
+    ) {
+        log.info("Uploading {} images for product ID: {}", files.size(), id);
+        return ApiResponse.<List<String>>builder()
+                .result(productService.uploadProductImages(id, files))
+                .build();
     }
 }

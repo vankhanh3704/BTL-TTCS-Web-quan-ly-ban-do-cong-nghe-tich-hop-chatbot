@@ -2,6 +2,7 @@ package com.example.e_commerce.technology.service.impl;
 
 import com.example.e_commerce.technology.Entity.CategoryEntity;
 import com.example.e_commerce.technology.Entity.ProductEntity;
+import com.example.e_commerce.technology.Entity.ProductImageEntity;
 import com.example.e_commerce.technology.Enum.ErrorCode;
 import com.example.e_commerce.technology.exception.AppException;
 import com.example.e_commerce.technology.mapper.ProductMapper;
@@ -17,11 +18,23 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.imgscalr.Scalr;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -31,10 +44,11 @@ public class ProductService implements IProductService {
     ProductRepository productRepository;
     ProductMapper productMapper;
     CategoryRepository categoryRepository;
+    String uploadDir = "./uploads";
 
     @Override
     public ProductResponse createProduct(ProductRequest request) {
-        if(productRepository.existsByName(request.getName())){
+        if (productRepository.existsByName(request.getName())) {
             throw new AppException(ErrorCode.PRODUCT_EXISTED);
         }
         CategoryEntity category = categoryRepository.findById(request.getCategoryId())
@@ -47,7 +61,7 @@ public class ProductService implements IProductService {
     @Override
     public ProductResponse updateProduct(Long id, ProductRequest request) {
         ProductEntity product = productRepository.findById(id)
-                .orElseThrow(()-> new AppException(ErrorCode.PRODUCT_NOT_EXISTED));
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_EXISTED));
         productMapper.updateProduct(product, request);
         var category = categoryRepository.findById(request.getCategoryId())
                 .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
@@ -62,7 +76,7 @@ public class ProductService implements IProductService {
 
     @Override
     public Page<ProductResponse> getAllProducts(Pageable pageable) {
-        return  productRepository.findAll(pageable).map(productMapper::toProductResponse);
+        return productRepository.findAll(pageable).map(productMapper::toProductResponse);
     }
 
     public Page<ProductResponse> searchProducts(ProductSearchRequest request, Pageable pageable) {
@@ -102,4 +116,48 @@ public class ProductService implements IProductService {
         log.info("Found {} products", productPage.getTotalElements());
         return productPage.map(productMapper::toProductResponse);
     }
+
+    public List<String> uploadProductImages(Long productId, List<MultipartFile> files) {
+        ProductEntity product = productRepository.findById(productId)
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_EXISTED));
+
+        List<String> imageUrls = new ArrayList<>();
+        File uploadDirFile = new File(uploadDir);
+        if (!uploadDirFile.exists()) {
+            uploadDirFile.mkdirs();
+        }
+
+        for (MultipartFile file : files) {
+            try {
+                // Tối ưu hóa ảnh
+                BufferedImage originalImage = ImageIO.read(file.getInputStream());
+                BufferedImage resizedImage = Scalr.resize(originalImage, Scalr.Method.QUALITY, Scalr.Mode.FIT_TO_WIDTH, 800); // Resize về 800px chiều rộng
+
+                // Tạo tên file duy nhất
+                String fileName = UUID.randomUUID() + "-" + file.getOriginalFilename();
+                Path filePath = Paths.get(uploadDir, fileName);
+
+                // Lưu ảnh đã tối ưu
+                ImageIO.write(resizedImage, "jpg", filePath.toFile());
+
+                // Tạo URL (giả sử server chạy trên localhost:8080)
+                String url = "/uploads/" + fileName;
+                imageUrls.add(url);
+
+                // Lưu vào database
+                ProductImageEntity image = ProductImageEntity.builder()
+                        .image_url(url)
+                        .altText(file.getOriginalFilename())
+                        .product(product)
+                        .build();
+                product.getImages().add(image);
+            } catch (IOException e) {
+                log.error("Failed to upload image: {}", file.getOriginalFilename(), e);
+                throw new AppException(ErrorCode.IMAGE_UPLOAD_FAILED);
+            }
+        }
+
+        productRepository.save(product);
+        return imageUrls;
     }
+}

@@ -7,6 +7,9 @@ import com.example.e_commerce.technology.model.request.ProductSearchRequest;
 import com.example.e_commerce.technology.model.response.ProductResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 public interface IProductService {
     ProductResponse createProduct(ProductRequest request);
@@ -15,4 +18,5 @@ public interface IProductService {
     Page<ProductResponse> getAllProducts(Pageable pageable);
     Page<ProductResponse> searchProducts(ProductSearchRequest request, Pageable pageable);
     Page<ProductResponse> searchProducts(ProductQueryParams params);
+    List<String> uploadProductImages(Long productId, List<MultipartFile> files);
 }

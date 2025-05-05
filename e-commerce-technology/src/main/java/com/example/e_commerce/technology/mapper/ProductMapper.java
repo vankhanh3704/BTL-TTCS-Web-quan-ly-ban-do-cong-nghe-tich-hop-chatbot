@@ -17,6 +17,7 @@ public interface ProductMapper {
     ProductEntity toProduct(ProductRequest request);
     @Mapping(source = "id", target = "id")
     @Mapping(source = "category", target = "category")
+    @Mapping(target = "imageUrls", expression = "java(entity.getImages().stream().map(com.example.e_commerce.technology.Entity.ProductImageEntity::getImage_url).collect(java.util.stream.Collectors.toList()))")
     ProductResponse toProductResponse(ProductEntity entity);
 
     void updateProduct(@MappingTarget ProductEntity entity, ProductRequest request);
