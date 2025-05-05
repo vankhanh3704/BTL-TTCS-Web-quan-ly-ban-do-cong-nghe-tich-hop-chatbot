@@ -15,6 +15,7 @@ public interface ProductMapper {
     @Mapping(target = "createdAt", ignore = true) // Bỏ qua createdAt vì được set trong @PrePersist
     @Mapping(target = "category", expression = "java(new CategoryEntity(request.getCategoryId(), null))") // Ánh xạ categoryId
     ProductEntity toProduct(ProductRequest request);
+    @Mapping(source = "id", target = "id")
     @Mapping(source = "category", target = "category")
     ProductResponse toProductResponse(ProductEntity entity);
 
