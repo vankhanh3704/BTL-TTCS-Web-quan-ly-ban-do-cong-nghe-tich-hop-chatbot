@@ -16,13 +16,26 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class OrderResponse {
-    @JsonProperty("id")
-    String id;
-    String userId;
-    OrderStatus status;
-    String shippingAddress;
-    PaymentMethod paymentMethod;
-    Long totalAmount;
-    LocalDateTime createdAt;
-    List<OrderItemResponse> items;
+    private Long id;
+    private Long userId;
+    private String shippingAddress;
+    private String paymentMethod;
+    private String status;
+    private LocalDateTime createdAt;
+    private Long totalAmount;
+    private List<OrderItemResponse> items;
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class OrderItemResponse {
+        @JsonProperty("id")
+        Long id;
+        Long productId;
+        String productName;
+        Long unitPrice;
+        Integer quantity;
+        Long subTotal;
+    }
 }

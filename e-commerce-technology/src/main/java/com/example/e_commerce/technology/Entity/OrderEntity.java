@@ -2,6 +2,7 @@ package com.example.e_commerce.technology.Entity;
 
 import com.example.e_commerce.technology.Enum.OrderStatus;
 import com.example.e_commerce.technology.Enum.PaymentMethod;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -46,6 +47,7 @@ public class OrderEntity {
     LocalDateTime createdAt;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     List<OrderItemEntity> items = new ArrayList<>();
 
     @PrePersist

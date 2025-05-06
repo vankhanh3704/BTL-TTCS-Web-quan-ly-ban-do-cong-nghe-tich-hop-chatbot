@@ -1,15 +1,15 @@
 package com.example.e_commerce.technology.service.impl;
 
-import com.example.e_commerce.technology.Entity.CartEntity;
-import com.example.e_commerce.technology.Entity.CartItemEntity;
-import com.example.e_commerce.technology.Entity.ProductEntity;
-import com.example.e_commerce.technology.Entity.UserEntity;
+import com.example.e_commerce.technology.Entity.*;
 import com.example.e_commerce.technology.Enum.ErrorCode;
+import com.example.e_commerce.technology.Enum.PaymentMethod;
 import com.example.e_commerce.technology.exception.AppException;
 import com.example.e_commerce.technology.mapper.CartMapper;
 import com.example.e_commerce.technology.model.request.CartItemRequest;
 import com.example.e_commerce.technology.model.response.CartResponse;
+import com.example.e_commerce.technology.model.response.OrderResponse;
 import com.example.e_commerce.technology.repository.CartRepository;
+import com.example.e_commerce.technology.repository.OrderRepository;
 import com.example.e_commerce.technology.repository.ProductRepository;
 import com.example.e_commerce.technology.repository.UserRepository;
 import com.example.e_commerce.technology.service.ICartService;
@@ -36,6 +36,7 @@ public class CartService implements ICartService {
     CartRepository cartRepository;
     ProductRepository productRepository;
     CartMapper cartMapper;
+    OrderRepository orderRepository;
 
 
     @Override
@@ -149,5 +150,80 @@ public class CartService implements ICartService {
         cartItems.clear();
         cartRepository.save(cart);
 
+    }
+
+    @Override
+    public OrderResponse checkout(String userId, String shippingAddress, String paymentMethod) {
+        UserEntity user = userRepository.findByUsername(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        CartEntity cart = cartRepository.findByUserId(user.getId())
+                .orElseThrow(() -> new AppException(ErrorCode.CART_NOT_FOUND));
+        List<CartItemEntity> cartItems = cart.getItems();
+        if (cartItems == null || cartItems.isEmpty()) {
+            throw new AppException(ErrorCode.CART_NOT_FOUND);
+        }
+
+        // Kiểm tra tồn kho
+        for (CartItemEntity item : cartItems) {
+            ProductEntity product = item.getProduct();
+            if (product.getStock() < item.getQuantity()) {
+                throw new AppException(ErrorCode.INSUFFICIENT_STOCK);
+            }
+        }
+
+        // Tạo đơn hàng
+        OrderEntity order = OrderEntity.builder()
+                .user(user)
+                .shippingAddress(shippingAddress)
+                .paymentMethod(PaymentMethod.valueOf(paymentMethod.toUpperCase()))
+                .totalAmount(cartItems.stream()
+                        .mapToLong(item -> item.getQuantity() * item.getProduct().getPrice())
+                        .sum())
+                .build();
+
+        // Thêm các mục đơn hàng
+        List<OrderItemEntity> orderItems = cartItems.stream().map(cartItem -> OrderItemEntity.builder()
+                .order(order)
+                .product(cartItem.getProduct())
+                .quantity(cartItem.getQuantity())
+                .unitPrice(cartItem.getProduct().getPrice())
+                .build()).collect(Collectors.toList());
+        order.setItems(orderItems);
+
+        // Lưu đơn hàng
+        orderRepository.save(order);
+
+        // Giảm tồn kho
+        for (CartItemEntity item : cartItems) {
+            ProductEntity product = item.getProduct();
+            product.setStock(product.getStock() - item.getQuantity());
+            productRepository.save(product);
+        }
+
+        // Xóa giỏ hàng
+        clearCart(userId);
+
+        // Map sang OrderResponse
+        OrderResponse response = new OrderResponse();
+        response.setId(order.getId());
+        response.setUserId(user.getId());
+        response.setShippingAddress(order.getShippingAddress());
+        response.setPaymentMethod(order.getPaymentMethod().name());
+        response.setStatus(order.getStatus().name());
+        response.setCreatedAt(order.getCreatedAt());
+        response.setTotalAmount(order.getTotalAmount());
+        response.setItems(order.getItems().stream().map(orderItem -> {
+            OrderResponse.OrderItemResponse itemResponse = new OrderResponse.OrderItemResponse();
+            itemResponse.setId(orderItem.getId());
+            itemResponse.setProductId(orderItem.getProduct().getId());
+            itemResponse.setProductName(orderItem.getProduct().getName());
+            itemResponse.setUnitPrice(orderItem.getUnitPrice());
+            itemResponse.setQuantity(orderItem.getQuantity());
+            itemResponse.setSubTotal(orderItem.getQuantity() * orderItem.getUnitPrice());
+            return itemResponse;
+        }).collect(Collectors.toList()));
+
+        return response;
     }
 }

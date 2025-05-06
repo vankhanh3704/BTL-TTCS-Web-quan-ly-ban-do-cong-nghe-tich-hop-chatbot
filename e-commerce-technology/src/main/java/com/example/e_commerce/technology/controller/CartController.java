@@ -4,13 +4,16 @@ package com.example.e_commerce.technology.controller;
 import com.example.e_commerce.technology.Enum.ErrorCode;
 import com.example.e_commerce.technology.exception.AppException;
 import com.example.e_commerce.technology.model.request.CartItemRequest;
+import com.example.e_commerce.technology.model.request.CheckoutRequest;
 import com.example.e_commerce.technology.model.response.ApiResponse;
 import com.example.e_commerce.technology.model.response.CartResponse;
+import com.example.e_commerce.technology.model.response.OrderResponse;
 import com.example.e_commerce.technology.service.ICartService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -64,6 +67,17 @@ public class CartController {
         cartService.clearCart(userId);
         return ApiResponse.<String>builder()
                 .result("Cart cleared")
+                .build();
+    }
+
+    @PostMapping("/checkout")
+    public ApiResponse<?> checkout(
+            @RequestHeader("Authorization") String authorization,
+            @RequestBody CheckoutRequest request) {
+        String userId = getCurrentUserId();
+        OrderResponse response = cartService.checkout(userId, request.getShippingAddress(), request.getPaymentMethod());
+        return ApiResponse.builder()
+                .result(response)
                 .build();
     }
 }
