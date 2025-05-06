@@ -122,12 +122,32 @@ public class CartService implements ICartService {
     }
 
     @Override
-    public void removeFromCart(Long userId, Long productId) {
+    public void removeFromCart(String userId, Long productId) {
+        UserEntity user = userRepository.findByUsername(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
+        CartEntity cart = cartRepository.findByUserId(user.getId())
+                .orElseThrow( () -> new AppException(ErrorCode.CART_NOT_FOUND));
+
+        List<CartItemEntity> cartItems = cart.getItems();
+        boolean removed = cartItems.removeIf(
+                item -> item.getProduct().getId().equals(productId));
+        if (!removed) {
+            throw new AppException(ErrorCode.CART_ITEM_NOT_FOUND);
+        }
+
+        cartRepository.save(cart);
     }
 
     @Override
-    public void clearCart(Long userId) {
+    public void clearCart(String userId) {
+        UserEntity user = userRepository.findByUsername(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        CartEntity cart = cartRepository.findByUserId(user.getId())
+                .orElseThrow(() -> new AppException(ErrorCode.CART_NOT_FOUND));
+        List<CartItemEntity> cartItems = cart.getItems();
+        cartItems.clear();
+        cartRepository.save(cart);
 
     }
 }

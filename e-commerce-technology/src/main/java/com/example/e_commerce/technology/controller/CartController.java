@@ -1,20 +1,17 @@
 package com.example.e_commerce.technology.controller;
 
 
-import com.example.e_commerce.technology.Entity.CartEntity;
 import com.example.e_commerce.technology.Enum.ErrorCode;
 import com.example.e_commerce.technology.exception.AppException;
 import com.example.e_commerce.technology.model.request.CartItemRequest;
 import com.example.e_commerce.technology.model.response.ApiResponse;
 import com.example.e_commerce.technology.model.response.CartResponse;
 import com.example.e_commerce.technology.service.ICartService;
-import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -29,7 +26,7 @@ public class CartController {
         var context = SecurityContextHolder.getContext();
         var authentication = context.getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
-            throw new IllegalStateException("User not authenticated");
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
         }
         return authentication.getName();
     }
@@ -52,5 +49,21 @@ public class CartController {
                 .build();
     }
 
+    @DeleteMapping("/items/{productId}")
+    ApiResponse<String> removeFromCart(@PathVariable Long productId) {
+        String userId = getCurrentUserId();
+        cartService.removeFromCart(userId, productId);
+        return ApiResponse.<String>builder()
+                .result("Item removed from cart.")
+                .build();
+    }
 
+    @DeleteMapping
+    ApiResponse<String> clearCart() {
+        String userId = getCurrentUserId();
+        cartService.clearCart(userId);
+        return ApiResponse.<String>builder()
+                .result("Cart cleared")
+                .build();
+    }
 }

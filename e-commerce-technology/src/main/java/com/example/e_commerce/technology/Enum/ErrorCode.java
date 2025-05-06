@@ -24,6 +24,7 @@ public enum ErrorCode {
     IMAGE_NOT_FOUND(1012, "Image not found.", HttpStatus.NOT_FOUND),
     INSUFFICIENT_STOCK(1013, "Insufficient stock.", HttpStatus.BAD_REQUEST),
     CART_NOT_FOUND(1014, "Cart not found.", HttpStatus.NOT_FOUND),
+    CART_ITEM_NOT_FOUND(1015, "Cart item not found.", HttpStatus.NOT_FOUND),
     ;
 
 
