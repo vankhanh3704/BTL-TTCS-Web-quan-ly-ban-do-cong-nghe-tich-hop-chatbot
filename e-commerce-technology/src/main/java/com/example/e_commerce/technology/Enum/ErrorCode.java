@@ -23,6 +23,7 @@ public enum ErrorCode {
     IMAGE_UPLOAD_FAILED(1011, "Image upload failed.", HttpStatus.INTERNAL_SERVER_ERROR),
     IMAGE_NOT_FOUND(1012, "Image not found.", HttpStatus.NOT_FOUND),
     INSUFFICIENT_STOCK(1013, "Insufficient stock.", HttpStatus.BAD_REQUEST),
+    CART_NOT_FOUND(1014, "Cart not found.", HttpStatus.NOT_FOUND),
     ;
 
 

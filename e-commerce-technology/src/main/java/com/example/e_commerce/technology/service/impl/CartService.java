@@ -102,8 +102,23 @@ public class CartService implements ICartService {
 
 
     @Override
-    public CartResponse getCart(Long userId) {
-        return null;
+    public CartResponse getCart(String userId) {
+        UserEntity user = userRepository.findByUsername(userId).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        CartEntity cart =  cartRepository.findByUserId(user.getId())
+                .orElseThrow(() -> new AppException(ErrorCode.CART_NOT_FOUND));
+        List<CartResponse.CartItemResponse> itemResponses = cart.getItems().stream()
+                .map(cartMapper::toCartItemResponse)
+                .collect(Collectors.toList());
+
+        long totalAmount = itemResponses.stream()
+                .mapToLong(CartResponse.CartItemResponse::getSubTotal)
+                .sum();
+
+        return CartResponse.builder()
+                .id(cart.getId())
+                .items(itemResponses)
+                .totalAmount(totalAmount)
+                .build();
     }
 
     @Override

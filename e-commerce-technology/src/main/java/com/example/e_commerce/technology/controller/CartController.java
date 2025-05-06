@@ -15,10 +15,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -45,4 +42,15 @@ public class CartController {
                 .result(cartService.addToCart(userId, request))
                 .build();
     }
+
+
+    @GetMapping
+    ApiResponse<CartResponse> getCart() {
+        String userId = getCurrentUserId();
+        return ApiResponse.<CartResponse>builder()
+                .result(cartService.getCart(userId))
+                .build();
+    }
+
+
 }

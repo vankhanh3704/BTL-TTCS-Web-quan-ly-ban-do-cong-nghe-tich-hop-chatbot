@@ -6,7 +6,7 @@ import com.example.e_commerce.technology.model.response.CartResponse;
 
 public interface ICartService {
     CartResponse addToCart(String userId, CartItemRequest request);
-    CartResponse getCart(Long userId);
+    CartResponse getCart(String userId);
     void removeFromCart(Long userId, Long productId);
     void clearCart(Long userId);
 }
