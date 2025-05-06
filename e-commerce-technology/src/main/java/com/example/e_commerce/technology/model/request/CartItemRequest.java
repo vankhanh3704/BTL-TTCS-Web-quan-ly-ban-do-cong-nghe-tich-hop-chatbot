@@ -16,5 +16,5 @@ public class CartItemRequest {
     Long productId;
     @NotNull
     @Positive
-    Integer quantity;
+    Integer quantity; // so luong san pham
 }

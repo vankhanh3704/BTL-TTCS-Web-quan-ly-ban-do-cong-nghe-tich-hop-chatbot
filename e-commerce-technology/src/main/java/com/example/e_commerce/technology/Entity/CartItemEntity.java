@@ -1,11 +1,14 @@
 package com.example.e_commerce.technology.Entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 @Entity
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -18,10 +21,12 @@ public class CartItemEntity {
 
     @ManyToOne
     @JoinColumn(name = "cartId", nullable = false)
+    @JsonBackReference
     CartEntity cart;
 
     @ManyToOne
     @JoinColumn(name = "productId", nullable = false)
+    @JsonIgnore
     ProductEntity product;
 
     @Column(nullable = false)
