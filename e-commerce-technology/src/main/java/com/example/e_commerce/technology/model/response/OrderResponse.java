@@ -30,7 +30,6 @@ public class OrderResponse {
     @AllArgsConstructor
     @Builder
     public static class OrderItemResponse {
-        @JsonProperty("id")
         Long id;
         Long productId;
         String productName;
