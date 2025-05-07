@@ -11,8 +11,14 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -36,6 +42,15 @@ public class OrderController {
         OrderResponse response = orderService.createOrder(userId, request);
         return ApiResponse.builder()
                 .result(response)
+                .build();
+    }
+
+    @GetMapping
+    ApiResponse<?> getUserOrders(@PageableDefault(page = 0, size = 10) Pageable pageable){
+        String userId = getCurrentUserId();
+        log.info("Lấy danh sách đơn hàng của người dùng: {}, pageable: {}", userId, pageable);
+        return ApiResponse.builder()
+                .result(orderService.getUserOrders(userId, pageable))
                 .build();
     }
 

@@ -19,6 +19,8 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -90,6 +92,14 @@ public class OrderService implements IOrderService {
         }
 
         return mapToOrderResponse(order);
+    }
+
+    @Override
+    public Page<OrderResponse> getUserOrders(String userId, Pageable pageable) {
+        log.info("Truy vấn đơn hàng của người dùng: {}, pageable: {}", userId, pageable);
+        Page<OrderEntity> ordersPage = orderRepository.findByUserUsername(userId, pageable);
+        log.info("Tìm thấy {} đơn hàng, trang {}, kích thước {}", ordersPage.getTotalElements(), pageable.getPageNumber(), pageable.getPageSize());
+        return ordersPage.map(this::mapToOrderResponse);
     }
 
     private OrderResponse mapToOrderResponse(OrderEntity order) {
