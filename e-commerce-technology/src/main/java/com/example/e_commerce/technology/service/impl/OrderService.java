@@ -5,6 +5,7 @@ import com.example.e_commerce.technology.Entity.OrderItemEntity;
 import com.example.e_commerce.technology.Entity.ProductEntity;
 import com.example.e_commerce.technology.Entity.UserEntity;
 import com.example.e_commerce.technology.Enum.ErrorCode;
+import com.example.e_commerce.technology.Enum.OrderStatus;
 import com.example.e_commerce.technology.exception.AppException;
 import com.example.e_commerce.technology.mapper.OrderMapper;
 import com.example.e_commerce.technology.model.request.OrderItemRequest;
@@ -105,6 +106,36 @@ public class OrderService implements IOrderService {
     @Override
     public Page<OrderResponse> getOrders(Pageable pageable) {
         return orderRepository.findAll(pageable).map(this::mapToOrderResponse);
+    }
+
+    @Override
+    public OrderResponse updateOrderStatus(Long orderId, OrderStatus status) {
+        OrderEntity order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+        // Nếu chuyển sang CANCELLED, hoàn tồn kho
+        if (status == OrderStatus.CANCELLED && order.getStatus() != OrderStatus.CANCELLED) {
+            for (OrderItemEntity item : order.getItems()) {
+                ProductEntity product = item.getProduct();
+                product.setStock(product.getStock() + item.getQuantity());
+                productRepository.save(product);
+            }
+        }
+        order.setStatus(status);
+        orderRepository.save(order);
+        return mapToOrderResponse(order);
+    }
+
+    @Override
+    public void cancelOrder(Long orderId, String userId) {
+        OrderEntity order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+        if (!order.getUser().getUsername().equals(userId)) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+        if (order.getStatus() != OrderStatus.PENDING) {
+            throw new AppException(ErrorCode.INVALID_ORDER_STATUS);
+        }
+        updateOrderStatus(orderId, OrderStatus.CANCELLED);
     }
 
 

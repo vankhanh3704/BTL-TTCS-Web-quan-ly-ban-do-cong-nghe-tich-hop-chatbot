@@ -25,6 +25,8 @@ public enum ErrorCode {
     INSUFFICIENT_STOCK(1013, "Insufficient stock.", HttpStatus.BAD_REQUEST),
     CART_NOT_FOUND(1014, "Cart not found.", HttpStatus.NOT_FOUND),
     CART_ITEM_NOT_FOUND(1015, "Cart item not found.", HttpStatus.NOT_FOUND),
+    ORDER_NOT_FOUND(1016, "Order not found.", HttpStatus.NOT_FOUND),
+    INVALID_ORDER_STATUS(1017, "Orders can only be canceled in PENDING status.", HttpStatus.BAD_REQUEST),
     ;
 
 

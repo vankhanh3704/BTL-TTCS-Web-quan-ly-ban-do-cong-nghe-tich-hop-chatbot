@@ -11,4 +11,5 @@ public interface ICartService {
     void removeFromCart(String userId, Long productId);
     void clearCart(String userId);
     OrderResponse checkout(String userId, String shippingAddress, String paymentMethod);
+
 }

@@ -3,6 +3,7 @@ package com.example.e_commerce.technology.controller;
 import com.example.e_commerce.technology.Enum.ErrorCode;
 import com.example.e_commerce.technology.exception.AppException;
 import com.example.e_commerce.technology.model.request.OrderRequest;
+import com.example.e_commerce.technology.model.request.UpdateOrderStatusRequest;
 import com.example.e_commerce.technology.model.response.ApiResponse;
 import com.example.e_commerce.technology.model.response.OrderResponse;
 import com.example.e_commerce.technology.service.IOrderService;
@@ -61,4 +62,23 @@ public class OrderController {
                 .build();
     }
 
+    @PatchMapping("/status/{id}")
+    public ApiResponse<?> updateOrderStatus(@PathVariable Long id, @Valid @RequestBody UpdateOrderStatusRequest request) {
+
+        log.info("Cập nhật trạng thái đơn hàng ID: {} thành {}", id, request.getStatus());
+        OrderResponse response = orderService.updateOrderStatus(id, request.getStatus());
+        return ApiResponse.builder()
+                .result(response)
+                .build();
+    }
+
+    @DeleteMapping("/{id}")
+    public ApiResponse<?> cancelOrder(@PathVariable Long id) {
+        String userId = getCurrentUserId();
+        log.info("Hủy đơn hàng ID: {} của người dùng: {}", id, userId);
+        orderService.cancelOrder(id, userId);
+        return ApiResponse.builder()
+                .message("Đơn hàng đã được hủy")
+                .build();
+    }
 }

@@ -177,7 +177,7 @@ public class ProductService implements IProductService {
                 .findFirst()
                 .orElseThrow(() -> new AppException(ErrorCode.IMAGE_NOT_FOUND));
 
-        // Xóa file trên server (nếu lưu local)
+        // Xóa file trên server (local)
         try {
             Files.deleteIfExists(Paths.get(image.getImage_url().replace("/uploads/", uploadDir + "/")));
         } catch (IOException e) {
