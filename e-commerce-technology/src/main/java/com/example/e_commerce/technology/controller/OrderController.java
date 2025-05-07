@@ -45,12 +45,19 @@ public class OrderController {
                 .build();
     }
 
-    @GetMapping
+    @GetMapping("/info")
     ApiResponse<?> getUserOrders(@PageableDefault(page = 0, size = 10) Pageable pageable){
         String userId = getCurrentUserId();
         log.info("Lấy danh sách đơn hàng của người dùng: {}, pageable: {}", userId, pageable);
         return ApiResponse.builder()
                 .result(orderService.getUserOrders(userId, pageable))
+                .build();
+    }
+
+    @GetMapping
+    ApiResponse<?> getOrders(@PageableDefault(page = 0, size = 10) Pageable pageable){
+        return ApiResponse.builder()
+                .result(orderService.getOrders(pageable))
                 .build();
     }
 

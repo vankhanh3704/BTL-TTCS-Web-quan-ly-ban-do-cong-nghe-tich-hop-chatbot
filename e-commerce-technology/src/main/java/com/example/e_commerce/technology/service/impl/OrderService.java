@@ -102,6 +102,12 @@ public class OrderService implements IOrderService {
         return ordersPage.map(this::mapToOrderResponse);
     }
 
+    @Override
+    public Page<OrderResponse> getOrders(Pageable pageable) {
+        return orderRepository.findAll(pageable).map(this::mapToOrderResponse);
+    }
+
+
     private OrderResponse mapToOrderResponse(OrderEntity order) {
         OrderResponse response = orderMapper.toOrderResponse(order);
         response.setItems(orderMapper.toOrderItemResponses(order.getItems()));
