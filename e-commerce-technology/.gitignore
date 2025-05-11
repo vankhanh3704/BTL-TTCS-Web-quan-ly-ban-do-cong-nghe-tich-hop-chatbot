@@ -29,6 +29,8 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 
-### VS Code ###
 .vscode/
-e-commerce-technology/uploads/
+rasa_chatbot/
+rasa_env/
+models/
+uploads/

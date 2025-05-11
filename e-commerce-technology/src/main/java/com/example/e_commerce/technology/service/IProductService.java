@@ -18,6 +18,5 @@ public interface IProductService {
     Page<ProductResponse> getAllProducts(Pageable pageable);
     Page<ProductResponse> searchProducts(ProductSearchRequest request, Pageable pageable);
     Page<ProductResponse> searchProducts(ProductQueryParams params);
-    List<String> uploadProductImages(Long productId, List<MultipartFile> files);
     void deleteProductImage(Long productId, Long imageId);
 }

@@ -77,16 +77,6 @@ public class ProductController {
         return ApiResponse.<Page<ProductResponse>>builder().result(result).build();
     }
 
-    @PostMapping("/{id}/images")
-    public ApiResponse<List<String>> uploadProductImages(
-            @PathVariable Long id,
-            @RequestParam("files") List<MultipartFile> files
-    ) {
-        log.info("Uploading {} images for product ID: {}", files.size(), id);
-        return ApiResponse.<List<String>>builder()
-                .result(productService.uploadProductImages(id, files))
-                .build();
-    }
 
     @DeleteMapping("/{productId}/images/{imageId}")
     public ApiResponse<String> deleteProductImage(@PathVariable Long productId, @PathVariable Long imageId) {
