@@ -1,5 +1,9 @@
 HELP.md
 target/
+rasa_chatbot/
+rasa_env/
+models/
+uploads/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
@@ -30,7 +34,3 @@ build/
 !**/src/test/**/build/
 
 .vscode/
-rasa_chatbot/
-rasa_env/
-models/
-uploads/
