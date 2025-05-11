@@ -49,26 +49,131 @@ public class ProductService implements IProductService {
 
     @Override
     public ProductResponse createProduct(ProductRequest request) {
+        // Kiểm tra tên sản phẩm trùng lặp
         if (productRepository.existsByName(request.getName())) {
             throw new AppException(ErrorCode.PRODUCT_EXISTED);
         }
+
+        // Kiểm tra danh mục
         CategoryEntity category = categoryRepository.findById(request.getCategoryId())
                 .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
+
+        // Ánh xạ sang ProductEntity
         ProductEntity productEntity = productMapper.toProduct(request);
-        productEntity.setCategory(category); // Đặt danh mục đã kiểm tra
-        return productMapper.toProductResponse(productRepository.save(productEntity));
+        productEntity.setCategory(category);
+        productEntity.setImages(new ArrayList<>()); // Khởi tạo danh sách images
+
+        // Xử lý upload hình ảnh nếu có
+        List<String> imageUrls = new ArrayList<>();
+        if (request.getImages() != null && !request.getImages().isEmpty()) {
+            File uploadDirFile = new File(uploadDir);
+            if (!uploadDirFile.exists()) {
+                uploadDirFile.mkdirs();
+            }
+
+            for (MultipartFile file : request.getImages()) {
+                try {
+                    // Tối ưu hóa ảnh
+                    BufferedImage originalImage = ImageIO.read(file.getInputStream());
+
+                    // Resize ảnh chính (800px)
+                    BufferedImage mainImage = Scalr.resize(originalImage, Scalr.Method.QUALITY, Scalr.Mode.FIT_TO_WIDTH, 800);
+                    String fileName = UUID.randomUUID() + "-" + file.getOriginalFilename();
+                    Path mainPath = Paths.get(uploadDir, fileName);
+                    ImageIO.write(mainImage, "jpg", mainPath.toFile());
+                    String mainUrl = "/uploads/" + fileName;
+
+                    // Tạo thumbnail (200px)
+                    BufferedImage thumbnail = Scalr.resize(originalImage, Scalr.Method.QUALITY, Scalr.Mode.FIT_TO_WIDTH, 200);
+                    String thumbnailName = UUID.randomUUID() + "-thumb-" + file.getOriginalFilename();
+                    Path thumbPath = Paths.get(uploadDir, thumbnailName);
+                    ImageIO.write(thumbnail, "jpg", thumbPath.toFile());
+
+                    // Lưu vào ProductImageEntity
+                    ProductImageEntity image = ProductImageEntity.builder()
+                            .image_url(mainUrl)
+                            .altText(file.getOriginalFilename())
+                            .product(productEntity)
+                            .build();
+                    productEntity.getImages().add(image);
+                    imageUrls.add(mainUrl);
+                } catch (IOException e) {
+                    log.error("Failed to upload image: {}", file.getOriginalFilename(), e);
+                    throw new AppException(ErrorCode.IMAGE_UPLOAD_FAILED);
+                }
+            }
+        }
+
+        // Lưu sản phẩm vào cơ sở dữ liệu
+        productEntity = productRepository.save(productEntity);
+        return productMapper.toProductResponse(productEntity);
     }
+
+
 
     @Override
     public ProductResponse updateProduct(Long id, ProductRequest request) {
+        // Tìm sản phẩm
         ProductEntity product = productRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_EXISTED));
-        productMapper.updateProduct(product, request);
-        var category = categoryRepository.findById(request.getCategoryId())
+
+        // Kiểm tra tên sản phẩm trùng (ngoại trừ chính sản phẩm này)
+        if (!product.getName().equals(request.getName()) && productRepository.existsByName(request.getName())) {
+            throw new AppException(ErrorCode.PRODUCT_EXISTED);
+        }
+
+        // Kiểm tra danh mục
+        CategoryEntity category = categoryRepository.findById(request.getCategoryId())
                 .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
+
+        // Cập nhật các trường
+        product.setName(request.getName());
+        product.setPrice(request.getPrice());
+        product.setDescription(request.getDescription());
+        product.setStock(request.getStock());
         product.setCategory(category);
-        return productMapper.toProductResponse(productRepository.save(product));
+
+        // Xử lý upload hình ảnh mới (nếu có)
+        if (request.getImages() != null && !request.getImages().isEmpty()) {
+            File uploadDirFile = new File(uploadDir);
+            if (!uploadDirFile.exists()) {
+                uploadDirFile.mkdirs();
+            }
+
+            for (MultipartFile file : request.getImages()) {
+                try {
+                    BufferedImage originalImage = ImageIO.read(file.getInputStream());
+                    BufferedImage mainImage = Scalr.resize(originalImage, Scalr.Method.QUALITY, Scalr.Mode.FIT_TO_WIDTH, 800);
+                    String fileName = UUID.randomUUID() + "-" + file.getOriginalFilename();
+                    Path mainPath = Paths.get(uploadDir, fileName);
+                    ImageIO.write(mainImage, "jpg", mainPath.toFile());
+                    String mainUrl = "/uploads/" + fileName;
+
+                    BufferedImage thumbnail = Scalr.resize(originalImage, Scalr.Method.QUALITY, Scalr.Mode.FIT_TO_WIDTH, 200);
+                    String thumbnailName = UUID.randomUUID() + "-thumb-" + file.getOriginalFilename();
+                    Path thumbPath = Paths.get(uploadDir, thumbnailName);
+                    ImageIO.write(thumbnail, "jpg", thumbPath.toFile());
+
+                    ProductImageEntity image = ProductImageEntity.builder()
+                            .image_url(mainUrl)
+                            .altText(file
+
+                                    .getOriginalFilename())
+                            .product(product)
+                            .build();
+                    product.getImages().add(image);
+                } catch (IOException e) {
+                    log.error("Failed to upload image: {}", file.getOriginalFilename(), e);
+                    throw new AppException(ErrorCode.IMAGE_UPLOAD_FAILED);
+                }
+            }
+        }
+
+        // Lưu sản phẩm
+        productRepository.save(product);
+        return productMapper.toProductResponse(product);
     }
+
 
     @Override
     public void deleteProduct(Long id) {

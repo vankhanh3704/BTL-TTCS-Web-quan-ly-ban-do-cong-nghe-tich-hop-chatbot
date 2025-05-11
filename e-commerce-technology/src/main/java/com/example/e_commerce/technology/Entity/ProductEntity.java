@@ -6,6 +6,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -36,7 +37,7 @@ public class ProductEntity {
     CategoryEntity category;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
-    List<ProductImageEntity> images;
+    List<ProductImageEntity> images = new ArrayList<>();;
 
 
     @PrePersist

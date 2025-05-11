@@ -15,6 +15,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -28,17 +29,28 @@ import java.util.List;
 public class ProductController {
     IProductService productService;
 
-    @PostMapping
-    ApiResponse<ProductResponse> createProduct(@Valid @RequestBody ProductRequest request){
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ApiResponse<ProductResponse> createProduct(
+            @Valid @RequestPart("product") ProductRequest productRequest,
+            @RequestPart(value = "images", required = false) List<MultipartFile> images
+    ) {
+        log.info("Creating product: {}", productRequest);
+        productRequest.setImages(images); // Gán images vào ProductRequest
         return ApiResponse.<ProductResponse>builder()
-                .result(productService.createProduct(request))
+                .result(productService.createProduct(productRequest))
                 .build();
     }
 
-    @PutMapping("/{id}")
-    ApiResponse<ProductResponse> updateProduct(@PathVariable Long id, @RequestBody ProductRequest request){
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ApiResponse<ProductResponse> updateProduct(
+            @PathVariable Long id, // MongoDB dùng String cho ID
+            @Valid @RequestPart("product") ProductRequest productRequest,
+            @RequestPart(value = "images", required = false) List<MultipartFile> images
+    ) {
+        log.info("Updating product ID: {} with request: {}", id, productRequest);
+        productRequest.setImages(images);
         return ApiResponse.<ProductResponse>builder()
-                .result(productService.updateProduct(id, request))
+                .result(productService.updateProduct(id, productRequest))
                 .build();
     }
 

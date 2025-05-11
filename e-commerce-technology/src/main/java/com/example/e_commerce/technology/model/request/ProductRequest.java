@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -15,19 +16,16 @@ import java.util.List;
 @Builder
 public class ProductRequest {
     @NotNull
-    @Size(min = 1, max = 100)
     String name;
     @NotNull
     @Positive
     Long price;
     @NotNull
-    @Size(min = 1, max = 500)
     String description;
     @NotNull
     @Positive
     Long stock;
     @NotNull
     String categoryId;
-
-    List<String> imageUrls;
+    List<MultipartFile> images; // Thêm trường images
 }

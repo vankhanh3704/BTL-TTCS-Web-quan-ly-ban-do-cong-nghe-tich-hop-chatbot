@@ -12,7 +12,6 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
 public class ProductResponse {
-    @JsonProperty("id")
     String id;
     String name;
     Long price;
