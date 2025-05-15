@@ -86,4 +86,16 @@ public class ProductController {
                 .result("Image deleted successfully")
                 .build();
     }
+
+    @GetMapping("/by-category")
+    public ApiResponse<Page<ProductResponse>> getProductsByCategory(
+            @RequestParam String categoryName,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size
+    ) {
+        Page<ProductResponse> result = productService.getProductsByCategory(categoryName, PageRequest.of(page, size));
+        return ApiResponse.<Page<ProductResponse>>builder()
+                .result(result)
+                .build();
+    }
 }

@@ -216,4 +216,10 @@ public class ProductService implements IProductService {
         product.getImages().remove(image);
         productRepository.save(product);
     }
+
+    @Override
+    public Page<ProductResponse> getProductsByCategory(String category, Pageable pageable) {
+        return productRepository.findByCategoryName(category, pageable).map(productMapper::toProductResponse);
+
+    }
 }
