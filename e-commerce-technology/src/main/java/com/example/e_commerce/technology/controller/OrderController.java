@@ -7,6 +7,7 @@ import com.example.e_commerce.technology.model.request.UpdateOrderStatusRequest;
 import com.example.e_commerce.technology.model.response.ApiResponse;
 import com.example.e_commerce.technology.model.response.OrderResponse;
 import com.example.e_commerce.technology.service.IOrderService;
+import com.example.e_commerce.technology.utils.SecurityUtils;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -28,19 +29,11 @@ import java.util.Map;
 @Slf4j
 public class OrderController {
     IOrderService orderService;
-    private String getCurrentUserId() {
-        var context = SecurityContextHolder.getContext();
-        var authentication = context.getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new AppException(ErrorCode.UNAUTHENTICATED);
-        }
-        return authentication.getName();
-    }
+
 
     @PostMapping
     public ApiResponse<?> createOrder(@Valid @RequestBody OrderRequest request) {
-        String userId = getCurrentUserId();
-        OrderResponse response = orderService.createOrder(userId, request);
+        OrderResponse response = orderService.createOrder(SecurityUtils.getCurrentUsername(), request);
         return ApiResponse.builder()
                 .result(response)
                 .build();
@@ -48,10 +41,8 @@ public class OrderController {
 
     @GetMapping("/info")
     ApiResponse<?> getUserOrders(@PageableDefault(page = 0, size = 10) Pageable pageable){
-        String userId = getCurrentUserId();
-        log.info("Lấy danh sách đơn hàng của người dùng: {}, pageable: {}", userId, pageable);
         return ApiResponse.builder()
-                .result(orderService.getUserOrders(userId, pageable))
+                .result(orderService.getUserOrders(SecurityUtils.getCurrentUsername(), pageable))
                 .build();
     }
 
@@ -64,8 +55,6 @@ public class OrderController {
 
     @PatchMapping("/status/{id}")
     public ApiResponse<?> updateOrderStatus(@PathVariable Long id, @Valid @RequestBody UpdateOrderStatusRequest request) {
-
-        log.info("Cập nhật trạng thái đơn hàng ID: {} thành {}", id, request.getStatus());
         OrderResponse response = orderService.updateOrderStatus(id, request.getStatus());
         return ApiResponse.builder()
                 .result(response)
@@ -74,9 +63,7 @@ public class OrderController {
 
     @DeleteMapping("/{id}")
     public ApiResponse<?> cancelOrder(@PathVariable Long id) {
-        String userId = getCurrentUserId();
-        log.info("Hủy đơn hàng ID: {} của người dùng: {}", id, userId);
-        orderService.cancelOrder(id, userId);
+        orderService.cancelOrder(id, SecurityUtils.getCurrentUsername());
         return ApiResponse.builder()
                 .message("Đơn hàng đã được hủy")
                 .build();

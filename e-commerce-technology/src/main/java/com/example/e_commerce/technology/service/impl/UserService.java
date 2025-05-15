@@ -9,6 +9,7 @@ import com.example.e_commerce.technology.constant.PredefinedRole;
 import com.example.e_commerce.technology.exception.AppException;
 import com.example.e_commerce.technology.mapper.UserMapper;
 import com.example.e_commerce.technology.model.request.UserCreationRequest;
+import com.example.e_commerce.technology.model.request.UserInfoUpdateRequest;
 import com.example.e_commerce.technology.model.request.UserUpdateRequest;
 import com.example.e_commerce.technology.model.response.UserResponse;
 import com.example.e_commerce.technology.repository.RoleRepository;
@@ -83,16 +84,29 @@ public class UserService implements IUserService {
         return userMapper.toUserResponse(userRepository.save(user));
     }
 
+    @Override
     public UserResponse getMyInfo(){
-        var context = SecurityContextHolder.getContext();
-        String username = context.getAuthentication().getName();
-        UserEntity user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        UserEntity user = getCurrentUser();
         return userMapper.toUserResponse(user);
     }
+
+
+    @Override
+    public UserResponse updateMyInfo(UserInfoUpdateRequest request) {
+        UserEntity user = getCurrentUser();
+        userMapper.updateUserInfo(user, request);
+        return userMapper.toUserResponse(userRepository.save(user));
+    }
+
     public Page<UserResponse> searchUsersByKeyword(String keyword, Pageable pageable) {
 
         Page<UserEntity> users = userRepository.searchUsersByKeyword(keyword, pageable);
         return users.map(userMapper::toUserResponse);
+    }
+
+    private UserEntity getCurrentUser() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
     }
 }

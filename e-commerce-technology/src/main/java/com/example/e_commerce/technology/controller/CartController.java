@@ -9,6 +9,7 @@ import com.example.e_commerce.technology.model.response.ApiResponse;
 import com.example.e_commerce.technology.model.response.CartResponse;
 import com.example.e_commerce.technology.model.response.OrderResponse;
 import com.example.e_commerce.technology.service.ICartService;
+import com.example.e_commerce.technology.utils.SecurityUtils;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -25,37 +26,24 @@ import org.springframework.web.bind.annotation.*;
 public class CartController {
     ICartService cartService;
 
-    private String getCurrentUserId() {
-        var context = SecurityContextHolder.getContext();
-        var authentication = context.getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new AppException(ErrorCode.UNAUTHENTICATED);
-        }
-        return authentication.getName();
-    }
-
     @PostMapping
     public ApiResponse<CartResponse> addToCart(@RequestBody CartItemRequest request) {
-        String userId = getCurrentUserId();
-        log.info("Thêm sản phẩm {} vào giỏ hàng cho người dùng {}", request.getProductId(), userId);
         return ApiResponse.<CartResponse>builder()
-                .result(cartService.addToCart(userId, request))
+                .result(cartService.addToCart(SecurityUtils.getCurrentUsername(), request))
                 .build();
     }
 
 
     @GetMapping
     ApiResponse<CartResponse> getCart() {
-        String userId = getCurrentUserId();
         return ApiResponse.<CartResponse>builder()
-                .result(cartService.getCart(userId))
+                .result(cartService.getCart(SecurityUtils.getCurrentUsername()))
                 .build();
     }
 
     @DeleteMapping("/items/{productId}")
     ApiResponse<String> removeFromCart(@PathVariable Long productId) {
-        String userId = getCurrentUserId();
-        cartService.removeFromCart(userId, productId);
+        cartService.removeFromCart(SecurityUtils.getCurrentUsername(), productId);
         return ApiResponse.<String>builder()
                 .result("Item removed from cart.")
                 .build();
@@ -63,8 +51,7 @@ public class CartController {
 
     @DeleteMapping
     ApiResponse<String> clearCart() {
-        String userId = getCurrentUserId();
-        cartService.clearCart(userId);
+        cartService.clearCart(SecurityUtils.getCurrentUsername());
         return ApiResponse.<String>builder()
                 .result("Cart cleared")
                 .build();
@@ -72,10 +59,8 @@ public class CartController {
 
     @PostMapping("/checkout")
     public ApiResponse<?> checkout(
-            @RequestHeader("Authorization") String authorization,
             @RequestBody CheckoutRequest request) {
-        String userId = getCurrentUserId();
-        OrderResponse response = cartService.checkout(userId, request.getShippingAddress(), request.getPaymentMethod());
+        OrderResponse response = cartService.checkout(SecurityUtils.getCurrentUsername(), request.getShippingAddress(), request.getPaymentMethod());
         return ApiResponse.builder()
                 .result(response)
                 .build();

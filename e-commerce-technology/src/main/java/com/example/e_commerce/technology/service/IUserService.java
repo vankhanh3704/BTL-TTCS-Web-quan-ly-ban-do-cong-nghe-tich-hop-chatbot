@@ -2,6 +2,7 @@ package com.example.e_commerce.technology.service;
 
 
 import com.example.e_commerce.technology.model.request.UserCreationRequest;
+import com.example.e_commerce.technology.model.request.UserInfoUpdateRequest;
 import com.example.e_commerce.technology.model.request.UserUpdateRequest;
 import com.example.e_commerce.technology.model.response.UserResponse;
 import org.springframework.data.domain.Page;
@@ -15,4 +16,6 @@ public interface IUserService {
     void deleteUserById(Long id);
     UserResponse getMyInfo();
     Page<UserResponse> searchUsersByKeyword(String keyword, Pageable pageable);
+
+    UserResponse updateMyInfo(UserInfoUpdateRequest request);
 }

@@ -34,7 +34,6 @@ public class ProductController {
             @Valid @RequestPart("product") ProductRequest productRequest,
             @RequestPart(value = "images", required = false) List<MultipartFile> images
     ) {
-        log.info("Creating product: {}", productRequest);
         productRequest.setImages(images); // Gán images vào ProductRequest
         return ApiResponse.<ProductResponse>builder()
                 .result(productService.createProduct(productRequest))
@@ -47,7 +46,6 @@ public class ProductController {
             @Valid @RequestPart("product") ProductRequest productRequest,
             @RequestPart(value = "images", required = false) List<MultipartFile> images
     ) {
-        log.info("Updating product ID: {} with request: {}", id, productRequest);
         productRequest.setImages(images);
         return ApiResponse.<ProductResponse>builder()
                 .result(productService.updateProduct(id, productRequest))
@@ -64,7 +62,6 @@ public class ProductController {
 
     @GetMapping
     public ApiResponse<Page<ProductResponse>> getAllProducts(@ModelAttribute ProductQueryParams params) {
-        log.info("Getting products with params: {}", params);
         return ApiResponse.<Page<ProductResponse>>builder()
                 .result(productService.searchProducts(params))
                 .build();
@@ -72,7 +69,6 @@ public class ProductController {
 
     @GetMapping("/search")
     public ApiResponse<Page<ProductResponse>> searchProducts(@RequestBody ProductSearchRequest request, Pageable pageable) {
-        log.info("Received search request: {}", request);
         Page<ProductResponse> result = productService.searchProducts(request, pageable);
         return ApiResponse.<Page<ProductResponse>>builder().result(result).build();
     }
@@ -80,7 +76,6 @@ public class ProductController {
 
     @DeleteMapping("/{productId}/images/{imageId}")
     public ApiResponse<String> deleteProductImage(@PathVariable Long productId, @PathVariable Long imageId) {
-        log.info("Deleting image ID: {} for product ID: {}", imageId, productId);
         productService.deleteProductImage(productId, imageId);
         return ApiResponse.<String>builder()
                 .result("Image deleted successfully")
