@@ -17,6 +17,8 @@ public class ProductResponse {
     Long price;
     String description;
     Long stock;
+    String color;
+
     CategoryResponse category;
     List<String> imageUrls;
 }

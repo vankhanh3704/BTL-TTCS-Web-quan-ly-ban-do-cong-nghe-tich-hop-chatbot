@@ -25,8 +25,10 @@ public class ProductEntity {
     String name;
     @Column(nullable = false)
     Long price;
-    @Column(nullable = false)
+    @Column(columnDefinition = "TEXT",nullable = false)
     String description;
+    @Column(nullable = false)
+    String color;
     @Column(nullable = false)
     Long stock;
     @Column(nullable = false)

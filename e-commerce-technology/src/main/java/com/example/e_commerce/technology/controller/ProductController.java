@@ -52,6 +52,13 @@ public class ProductController {
                 .build();
     }
 
+    @GetMapping("/{id}")
+    public ApiResponse<ProductResponse> getProduct(@PathVariable Long id) {
+        return ApiResponse.<ProductResponse>builder()
+                .result(productService.getProduct(id))
+                .build();
+    }
+
     @DeleteMapping("/{id}")
     ApiResponse<String> deleteProduct(@PathVariable Long id){
         productService.deleteProduct(id);

@@ -17,6 +17,7 @@ public class ProductSearchRequest {
     @Positive
     Long priceTo;
     String description;
+    String color;
     @Positive
     Long stockFrom;
     @Positive

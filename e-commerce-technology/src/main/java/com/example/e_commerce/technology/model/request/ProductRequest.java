@@ -22,6 +22,7 @@ public class ProductRequest {
     Long price;
     @NotNull
     String description;
+    String color;
     @NotNull
     @Positive
     Long stock;

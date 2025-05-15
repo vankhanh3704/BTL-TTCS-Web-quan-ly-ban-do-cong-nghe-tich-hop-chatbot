@@ -20,4 +20,6 @@ public interface IProductService {
     Page<ProductResponse> searchProducts(ProductQueryParams params);
     void deleteProductImage(Long productId, Long imageId);
     Page<ProductResponse> getProductsByCategory(String category, Pageable pageable);
+
+    ProductResponse getProduct(Long id);
 }

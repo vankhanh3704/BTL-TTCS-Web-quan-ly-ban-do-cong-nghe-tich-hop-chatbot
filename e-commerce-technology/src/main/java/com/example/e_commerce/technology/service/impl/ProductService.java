@@ -222,4 +222,10 @@ public class ProductService implements IProductService {
         return productRepository.findByCategoryName(category, pageable).map(productMapper::toProductResponse);
 
     }
+
+    @Override
+    public ProductResponse getProduct(Long id) {
+        ProductEntity product = productRepository.findById(id).orElseThrow( () -> new AppException(ErrorCode.PRODUCT_NOT_EXISTED));
+        return productMapper.toProductResponse(product);
+    }
 }
