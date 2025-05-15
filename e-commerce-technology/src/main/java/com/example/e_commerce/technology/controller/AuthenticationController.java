@@ -1,13 +1,12 @@
 package com.example.e_commerce.technology.controller;
 
 
-import com.example.e_commerce.technology.model.request.AuthenticationRequest;
-import com.example.e_commerce.technology.model.request.IntrospectRequest;
-import com.example.e_commerce.technology.model.request.LogoutRequest;
-import com.example.e_commerce.technology.model.request.RefreshTokenRequest;
+import com.example.e_commerce.technology.model.request.*;
 import com.example.e_commerce.technology.model.response.ApiResponse;
 import com.example.e_commerce.technology.model.response.AuthenticationResponse;
 import com.example.e_commerce.technology.model.response.IntrospectResponse;
+import com.example.e_commerce.technology.model.response.UserResponse;
+import com.example.e_commerce.technology.repository.UserRepository;
 import com.example.e_commerce.technology.service.IAuthenticationService;
 import com.nimbusds.jose.JOSEException;
 
@@ -27,6 +26,7 @@ import java.text.ParseException;
 @RequestMapping("/auth")
 public class AuthenticationController {
     IAuthenticationService authenticationService;
+    private final UserRepository userRepository;
 
 
     // log in : dựa theo token
@@ -58,4 +58,6 @@ public class AuthenticationController {
         var result = authenticationService.refreshToken(request);
         return ApiResponse.<AuthenticationResponse>builder().result(result).build();
     }
+
+
 }

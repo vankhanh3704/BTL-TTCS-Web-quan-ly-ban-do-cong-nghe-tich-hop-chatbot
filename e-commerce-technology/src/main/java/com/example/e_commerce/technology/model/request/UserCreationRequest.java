@@ -18,6 +18,8 @@ public class UserCreationRequest {
     String firstName;
     String lastName;
     String email;
+    String phone;
+    String address;
 
 
 }

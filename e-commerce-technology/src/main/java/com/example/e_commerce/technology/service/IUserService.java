@@ -18,4 +18,5 @@ public interface IUserService {
     Page<UserResponse> searchUsersByKeyword(String keyword, Pageable pageable);
 
     UserResponse updateMyInfo(UserInfoUpdateRequest request);
+
 }
