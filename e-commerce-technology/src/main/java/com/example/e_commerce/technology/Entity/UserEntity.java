@@ -23,6 +23,8 @@ public class UserEntity {
     String password;
     String firstName;
     String lastName;
+    String gender;
+    String dateOfBirth;
     String email;
     String phone;
     String address;
